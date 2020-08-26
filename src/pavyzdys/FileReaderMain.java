@@ -5,26 +5,38 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-
+// this class name should be changed
 public class FileReaderMain {
 
     public static void main(String[] args) throws IOException {
 
         //Reading words from files in a folder
-        String target_dir = "C:/Program Files/Ampps/www/Tado_uzduotis/src/pavyzdys/filesWithEnglishWords";
-        File dir = new File(target_dir);
+        // traditionally, files are read from the '/resources/ dir, not from a random folder on the disk
+        // I would include the input files in the git project (and maybe the output files too). You only included output files, they make no sense without inputs
+
+        // does this variable declare a target or a source? :)
+        // String target_dir = "C:/Program Files/Ampps/www/Tado_uzduotis/src/pavyzdys/filesWithEnglishWords";
+        // you need 2 constants, i.e.:
+        final String SOURCE_DIR = "resources/input/";
+        final String TARGET_DIR = "resources/output/";
+        File dir = new File(SOURCE_DIR);
         File[] files = dir.listFiles();
+        // I would name this variable "allWords" or something similar. "list" is non-descriptive
         ArrayList<String> list = new ArrayList<>();
 
         for (File f : files) {
             if (f.isFile()) {
                 BufferedReader inputStream = null;
 
+                // this style of try-catch-finally is very old-school (pre-Java 7).
+                // I would use try-with-resources: https://www.baeldung.com/java-try-with-resources
                 try {
                     inputStream = new BufferedReader(
                             new FileReader(f));
+                    // this variable is recreated on each loop cycle, I would declare it before I enter the loop
                     String line;
 
+                    // do you split the line into separate words?
                     while ((line = inputStream.readLine()) != null) {
                         list.add(line);
                     }
@@ -54,7 +66,9 @@ public class FileReaderMain {
         BufferedWriter ag = new BufferedWriter(fstream);
 
         for (Map.Entry<String, Integer> entry : tm.entrySet()) {
+            // here I get a "String index out of range: 0" exception when testing with my own input files from /resources/input dir, looks like I have some empty strings in the TreeMap, this case should be considered
             char first = entry.getKey().charAt(0);
+            // what about words starting with upper case letters?
             if ((first >= 'a' && first <= 'g')) {
                 System.out.println(entry.getKey() + " : " + entry.getValue());
                 ag.write(entry.getKey() + ":" + entry.getValue());
@@ -63,6 +77,9 @@ public class FileReaderMain {
                 ag.flush();   // Flush the buffer and write all changes to the disk
             }
         }
+
+        // you are repeating the same code 4 times and only change starting/ending letters + file name
+        // you can either extract file writing into a separate method, or reuse the same loop with different inputs
 
         // Writing words starting h - n in a file
         FileWriter filestream = new FileWriter("second.txt");
